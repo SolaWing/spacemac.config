@@ -1,0 +1,9 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: dispatch_after
+# key: dispatch_after
+# binding: direct-keybinding
+# --
+dispatch_after(dispatch_time(DISPATCH_TIME_NOW, ${1:3}* NSEC_PER_SEC),
+	dispatch_get_main_queue(), ${2:^\{
+	$3
+\}});
