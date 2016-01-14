@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: @property
+# key: property
+# key: prop
+# binding: direct-keybinding
+# --
+@property ${1:(nonatomic,strong)} ${2:NSString*} ${3:name};

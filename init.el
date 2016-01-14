@@ -36,14 +36,13 @@ values."
      python
      emacs-lisp
      osx
-     ;; git
+     git
      markdown
      ;; org
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
-     ;; syntax-checking
      ;; version-control
      )
    ;; List of additional packages that will be installed without being
@@ -250,6 +249,8 @@ It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   (setq-default
+   ;; TODO now mainly use objc project, write common judge function later
+   c-c++-default-mode-for-headers 'objc-mode
    ;; mirror of package
    ;; add popkit for china connection
    configuration-layer--elpa-archives
@@ -277,7 +278,9 @@ layers configuration. You are free to put any user code."
     )
   (use-package company :defer t
     :config
-    (setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend)))
+    (progn
+      (setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
+      ))
   (use-package yasnippet :defer t
     :config
     (progn
@@ -295,16 +298,24 @@ layers configuration. You are free to put any user code."
   "try expand yas at current point, or call yas-insert"
   (interactive)
 
-  (let ((yas-fallback-behavior 'return-nil))
-    (unless (yas-expand-from-trigger-key)
-      (helm-yas-complete))
-    )
+  (if (use-region-p) (yas/visual-insert)
+    (let ((yas-fallback-behavior 'return-nil))
+      (unless (yas-expand-from-trigger-key)
+        (helm-yas-complete))
+      ))
+  )
+
+(defun yas/visual-insert ()
+  "visual delete and call yas insert"
+  (let ((yas-selected-text (and (use-region-p)
+                                (delete-and-extract-region (region-beginning) (region-end)))))
+    (helm-yas-complete))
   )
 
 (defun ycmd/force-semantic-complete ()
   "Force semantic complete with company"
   (interactive)
-  (let ((ycmd-force-semantic-completion nil))
+  (let ((ycmd-force-semantic-completion 't))
     (company-cancel)
     (company-begin-backend 'company-ycmd nil)
     )
