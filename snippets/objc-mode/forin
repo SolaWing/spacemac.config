@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: forin
+# key: forin
+# binding: direct-keybinding
+# --
+for (NSDictionary* ${2:element} in ${1:list}) {
+    $0
+}

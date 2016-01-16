@@ -248,6 +248,7 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
+  (message "user-init")
   (setq-default
    ;; TODO now mainly use objc project, write common judge function later
    c-c++-default-mode-for-headers 'objc-mode
@@ -263,6 +264,9 @@ in `dotspacemacs/user-config'."
    ycmd-global-config (expand-file-name "~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py")
    ;; style
    evil-escape-delay 0.2
+   dabbrev-case-replace nil           ; avoid complete relace case
+   ;; lack variable which cause error message
+   fixit-available nil
    )
   )
 
@@ -270,8 +274,17 @@ in `dotspacemacs/user-config'."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-
+  (message "user-config")
   (add-hook 'objc-mode-hook 'myobjc/config)
+
+  (global-set-key (kbd "s-m") 'suspend-frame)
+  (define-key spacemacs-default-map (kbd "SPC") 'evil-avy-goto-char)
+
+  (use-package evil :defer t
+    :config
+    (progn
+      (define-key evil-normal-state-map (kbd "M-.") 'repeat)
+      ))
   (use-package ycmd :defer t
     :config
     (define-key ycmd-mode-map (kbd "M-TAB") 'ycmd/force-semantic-complete)
@@ -279,7 +292,10 @@ layers configuration. You are free to put any user code."
   (use-package company :defer t
     :config
     (progn
-      (setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
+      (setq
+       company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend)
+       company-selection-wrap-around 't
+       )
       ))
   (use-package yasnippet :defer t
     :config
@@ -289,9 +305,17 @@ layers configuration. You are free to put any user code."
       ))
   )
 
+(defun open-file-in-vim (&optional file-name)
+  (interactive)
+  (unless file-name (setq file-name (buffer-file-name)))
+  (shell-command (format "open -a %s %s" "MacVim" (shell-quote-argument file-name)))
+  )
+
 (defun myobjc/config ()
   "custom config for objc-mode"
+  (c-set-style "linux")
   (setq c-basic-offset 4)
+  (setq company-backends '(company-ycmd company-yasnippet))
   )
 
 (defun yas/expand-or-complete ()
@@ -299,16 +323,17 @@ layers configuration. You are free to put any user code."
   (interactive)
 
   (if (use-region-p) (yas/visual-insert)
-    (let ((yas-fallback-behavior 'return-nil))
-      (unless (yas-expand-from-trigger-key)
+    ;; (let ((yas-fallback-behavior 'return-nil))
+    ;;   (unless (yas-expand-from-trigger-key)
         (helm-yas-complete))
-      ))
+      ;; ))
   )
 
 (defun yas/visual-insert ()
   "visual delete and call yas insert"
   (let ((yas-selected-text (and (use-region-p)
                                 (delete-and-extract-region (region-beginning) (region-end)))))
+    (when (evil-visual-state-p) (evil-insert 1))
     (helm-yas-complete))
   )
 
@@ -327,4 +352,6 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(create-lockfiles nil))
+ '(create-lockfiles nil)
+ '(paradox-github-token t))
+

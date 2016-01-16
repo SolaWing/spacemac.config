@@ -1,0 +1,10 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: interface
+# key: interface
+# binding: direct-keybinding
+# --
+@interface ${1:name} : ${2:NSObject}${3: <${4:NSObject}>}
+
+$5
+
+@end

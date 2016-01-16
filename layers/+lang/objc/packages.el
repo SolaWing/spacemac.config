@@ -21,6 +21,7 @@
       ycmd
       flycheck
       semantic
+      yasnippet
       ))
 
 ;; List of packages to exclude.
@@ -57,16 +58,60 @@
   (use-package company-ycmd :defer t
     :config
     ;; replace generic candidate to return detail info
-    (defun company-ycmd--construct-candidate-generic (candidate)
-      "Generic function to construct completion string from a CANDIDATE."
-      (company-ycmd--with-destructured-candidate
-       candidate
-       (propertize insertion-text
-                   'return_type extra-menu-info
-                   'kind kind
-                   'doc detailed-info
-                   'meta detailed-info))))
-  )
+    (progn
+      ;; extract candidates infos
+      (defun company-ycmd--objc-param (prefix signature)
+        (when (and prefix signature)
+          (let ((match (s-match (format "%s\\(\\^?([^)]*)\\|\\w+\\)" prefix) signature)))
+            (cadr match)
+            )))
+      (defun company-ycmd--construct-candidate-objc (candidate)
+        "function to construct completion objc string from a CANDIDATE."
+        (company-ycmd--with-destructured-candidate candidate
+          (let ((param (company-ycmd--objc-param insertion-text menu-text)))
+            (propertize insertion-text
+                        'return_type extra-menu-info
+                        'kind kind
+                        'doc detailed-info
+                        'meta detailed-info
+                        'param param))))
+
+      (advice-add 'company-ycmd--get-construct-candidate-fn :before-until
+                  (lambda () "check if objc-mode first"
+                    (when (eq major-mode 'objc-mode)
+                      #'company-ycmd--construct-candidate-objc)))
+
+      ;; post completion, add param
+      (if (configuration-layer/package-usedp 'yasnippet)
+          (defun company-template--add-objc-param (param)
+            (let ((templ (concat "${1:" param "}")))
+              (yas-expand-snippet templ)
+              (when (and (configuration-layer/package-usedp 'smartparens)
+                         (not smartparens-mode)
+                         smartparens-enabled-initially)
+                    (smartparens-mode 1))
+              ))
+        ;; when no yas, simple insert it. company-template has bugs
+        (defun company-template--add-objc-param (param)
+          (save-excursion (let* ((beg (point))
+                                 (end (progn (insert param) (point-marker)))
+                                 ;; (templ (company-template-declare-template (- beg 1) end))
+                                 )
+                            ;; (company-template-add-field templ (copy-marker beg) end)
+                            ;; (message "templated start:%d end:%d" (overlay-start templ) (overlay-end templ))
+                            ;; (company-template-move-to-first templ)
+                            ))))
+      (defun company-ycmd--objc-post-completion (candidate)
+        "Insert function arguments after completion for CANDIDATE."
+        (--when-let (and (eq major-mode 'objc-mode)
+                         company-ycmd-insert-arguments
+                         (get-text-property 0 'param candidate))
+          (company-template--add-objc-param it)
+          't
+          ))
+      (advice-add 'company-ycmd--post-completion :before-until
+                  #'company-ycmd--objc-post-completion)
+  )))
 
 
 ;; For each package, define a function objc/init-<package-name>

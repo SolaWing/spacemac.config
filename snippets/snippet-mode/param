@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: param
+# key: $
+# binding: direct-keybinding
+# --
+\${${1:n}:`yas-selected-text`$2}
