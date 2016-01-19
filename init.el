@@ -138,7 +138,7 @@ values."
    ;; and TAB or <C-m> and RET.
    ;; In the terminal, these pairs are generally indistinguishable, so this only
    ;; works in the GUI. (default nil)
-   dotspacemacs-distinguish-gui-tab nil
+   dotspacemacs-distinguish-gui-tab 't
    ;; (Not implemented) dotspacemacs-distinguish-gui-ret nil
    ;; The command key used for Evil commands (ex-commands) and
    ;; Emacs commands (M-x).
@@ -248,7 +248,6 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
-  (message "user-init")
   (setq-default
    ;; TODO now mainly use objc project, write common judge function later
    c-c++-default-mode-for-headers 'objc-mode
@@ -265,6 +264,10 @@ in `dotspacemacs/user-config'."
    ;; style
    evil-escape-delay 0.2
    dabbrev-case-replace nil           ; avoid complete relace case
+   ;; improve performance
+   dotspacemacs-mode-line-unicode-symbols nil
+   flycheck-check-syntax-automatically '(save idle-change mode-enabled)
+   flycheck-idle-change-delay 2
    ;; lack variable which cause error message
    fixit-available nil
    )
@@ -274,9 +277,9 @@ in `dotspacemacs/user-config'."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (message "user-config")
   (add-hook 'objc-mode-hook 'myobjc/config)
 
+  (electric-indent-mode -1)             ; not use auto indent when RET
   (global-set-key (kbd "s-m") 'suspend-frame)
   (define-key spacemacs-default-map (kbd "SPC") 'evil-avy-goto-char)
 
@@ -285,7 +288,7 @@ layers configuration. You are free to put any user code."
     (progn
       (define-key evil-normal-state-map (kbd "M-.") 'repeat)
       ))
-  (use-package ycmd :defer t
+  (use-package company-ycmd :defer t
     :config
     (define-key ycmd-mode-map (kbd "M-TAB") 'ycmd/force-semantic-complete)
     )
@@ -302,7 +305,29 @@ layers configuration. You are free to put any user code."
     (progn
       ;; yasnippet keymaps
       (define-key yas-minor-mode-map (kbd "M-'") 'yas/expand-or-complete)
+      ;; yasnippet bugs, which cause yasnippet stop work. possible order is:
+      ;; set previous-field of snippet, previous-snippet commit and turn to point.
+      ;; snippet call yas--advance-end cause invalid marker error!
+      (setq yas--snippet-revive nil)
+      (advice-add 'yas--commit-snippet :before (lambda (snippet) "check dead previous field"
+        (when (and (yas--snippet-previous-active-field snippet)
+                   (consp (yas--field-end (yas--snippet-previous-active-field snippet))))
+          (setf (yas--snippet-previous-active-field snippet) nil)
+          ;; (message "clear dead field" args)
+          )))
       ))
+
+  (use-package projectile :defer t
+    :config
+    ;; fix special-char in projectile-get-other-files
+    (advice-add 'projectile-get-other-files :filter-args
+                (lambda (args)
+                  "regexp-quote current-file before inner use regex match"
+                  (let ((current-file (car args)))
+                    (string-match "\\..+$" current-file)
+                    (cons (concat (regexp-quote (substring current-file 0 (match-beginning 0)))
+                                  (substring current-file (match-beginning 0)))
+                          (cdr args))))))
   )
 
 (defun open-file-in-vim (&optional file-name)
@@ -314,8 +339,8 @@ layers configuration. You are free to put any user code."
 (defun myobjc/config ()
   "custom config for objc-mode"
   (c-set-style "linux")
-  (setq c-basic-offset 4)
-  (setq company-backends '(company-ycmd company-yasnippet))
+  (setq c-basic-offset 4 tab-width 8)
+  (setq company-backends '(company-ycmd))
   )
 
 (defun yas/expand-or-complete ()
