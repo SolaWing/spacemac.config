@@ -38,7 +38,7 @@ values."
      osx
      git
      markdown
-     ;; org
+     org
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -49,9 +49,10 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(graphviz-dot-mode)
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '(spaceline)
+   ;; dotspacemacs-excluded-packages '(spaceline)
+   dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
@@ -249,6 +250,7 @@ It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   (setq-default
+   custom-file "~/.spacemacs.d/custom.el"
    ;; TODO now mainly use objc project, write common judge function later
    c-c++-default-mode-for-headers 'objc-mode
    ;; mirror of package
@@ -271,6 +273,7 @@ in `dotspacemacs/user-config'."
    ;; lack variable which cause error message
    fixit-available nil
    )
+  (load-file custom-file)
   )
 
 (defun dotspacemacs/user-config ()
@@ -282,6 +285,14 @@ layers configuration. You are free to put any user code."
   (electric-indent-mode -1)             ; not use auto indent when RET
   (global-set-key (kbd "s-m") 'suspend-frame)
   (define-key spacemacs-default-map (kbd "SPC") 'evil-avy-goto-char)
+
+  (defun org-pomodoro-extend-last-clock-and-rest ()
+    "extend last pomodoro clock and short break"
+    (interactive)
+    (org-pomodoro-extend-last-clock)
+    (org-pomodoro-start :short-break))
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode
+    "M-p" 'org-pomodoro-extend-last-clock-and-rest)
 
   (use-package evil :defer t
     :config
@@ -370,13 +381,3 @@ layers configuration. You are free to put any user code."
     (company-begin-backend 'company-ycmd nil)
     )
   )
-;; do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(create-lockfiles nil)
- '(paradox-github-token t))
-
