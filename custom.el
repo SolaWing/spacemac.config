@@ -3,7 +3,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-ycmd-request-sync-timeout 0.2)
  '(create-lockfiles nil)
+ '(mouse-wheel-scroll-amount (quote (1 ((meta) . 5) ((control)))))
  '(org-agenda-files (quote ("~/Desktop/GTD/dairy/" "~/Desktop/GTD/")))
  '(org-babel-load-languages (quote ((emacs-lisp . t) (dot . t))))
  '(org-src-lang-modes
@@ -27,5 +29,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-template-field ((t (:foreground "selectedMenuItemColor"))))
  '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
  '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))

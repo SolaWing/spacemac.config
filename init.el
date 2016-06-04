@@ -32,18 +32,22 @@ values."
      ycmd
      syntax-checking
      c-c++
-     objc
      python
      emacs-lisp
      osx
      git
      markdown
      org
+     unimpaired
+     eyebrowse
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      ;; version-control
+
+     ;; my custom layer
+     objc
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -213,7 +217,7 @@ values."
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters the
    ;; point when it reaches the top or bottom of the screen. (default t)
-   dotspacemacs-smooth-scrolling t
+   dotspacemacs-smooth-scrolling nil
    ;; If non nil line numbers are turned on in all `prog-mode' and `text-mode'
    ;; derivatives. If set to `relative', also turns on relative line numbers.
    ;; (default nil)
@@ -267,6 +271,7 @@ in `dotspacemacs/user-config'."
    evil-escape-delay 0.2
    dabbrev-case-replace nil           ; avoid complete relace case
    ;; improve performance
+   dotspacemacs-smooth-scrolling nil    ; in gnu emacs, this option seems not effect
    dotspacemacs-mode-line-unicode-symbols nil
    flycheck-check-syntax-automatically '(save idle-change mode-enabled)
    flycheck-idle-change-delay 2
@@ -280,11 +285,20 @@ in `dotspacemacs/user-config'."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (add-hook 'objc-mode-hook 'myobjc/config)
+  (if window-system (menu-bar-mode 1))
+  (unless (getenv "LANG")
+    (setenv "LANG" "zh_CN.UTF-8") (set-locale-environment "zh_CN.UTF-8"))
 
   (electric-indent-mode -1)             ; not use auto indent when RET
-  (global-set-key (kbd "s-m") 'suspend-frame)
+  ;; (global-set-key (kbd "s-m") 'suspend-frame)
   (define-key spacemacs-default-map (kbd "SPC") 'evil-avy-goto-char)
+  (global-set-key (kbd "<s-backspace>") 'kill-whole-line)
+
+  (use-package evil :defer t
+               :config
+               (progn
+                 (define-key evil-normal-state-map (kbd "M-.") 'repeat)
+                 ))
 
   (defun org-pomodoro-extend-last-clock-and-rest ()
     "extend last pomodoro clock and short break"
@@ -294,11 +308,9 @@ layers configuration. You are free to put any user code."
   (spacemacs/set-leader-keys-for-major-mode 'org-mode
     "M-p" 'org-pomodoro-extend-last-clock-and-rest)
 
-  (use-package evil :defer t
-    :config
-    (progn
-      (define-key evil-normal-state-map (kbd "M-.") 'repeat)
-      ))
+  (add-hook 'objc-mode-hook 'myobjc/config)
+  (spacemacs/set-leader-keys-for-major-mode 'objc-mode
+    "f" 'clang-format)
   (use-package company-ycmd :defer t
     :config
     (define-key ycmd-mode-map (kbd "M-TAB") 'ycmd/force-semantic-complete)
@@ -349,8 +361,13 @@ layers configuration. You are free to put any user code."
 
 (defun myobjc/config ()
   "custom config for objc-mode"
-  (c-set-style "linux")
-  (setq c-basic-offset 4 tab-width 8)
+  (c-add-style "myobjc"
+   '(
+     "stroustrup"
+     (c-basic-offset . 4)
+     (tab-width . 8)
+     )
+   t)
   (setq company-backends '(company-ycmd))
   )
 

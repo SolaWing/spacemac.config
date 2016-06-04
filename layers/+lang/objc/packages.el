@@ -59,73 +59,98 @@
     :config
     ;; replace generic candidate to return detail info
     (progn
+      (defun company-template-objc-templatify (selector)
+        (let* ((end (point-marker))
+               (beg (- (point) (length selector) 1))
+               (templ (company-template-declare-template beg end))
+               (cnt 0))
+          (save-excursion
+            (goto-char beg)
+            (catch 'stop
+              (while (search-forward ":" end t)
+                (if (looking-at "\\(\\(?:\\^[^(]*\\)?([^)]*)\\(\\w*\\)\\|\\w+\\)")
+                    (company-template-add-field templ (point) (match-end 1))
+                  ;; Not sure which conditions this case manifests under, but
+                  ;; apparently it did before, when I wrote the first test for this
+                  ;; function.  FIXME: Revisit it.
+                  (company-template-add-field templ (point)
+                                              (progn
+                                                (insert (format "arg%d" cnt))
+                                                (point)))
+                  (when (< (point) end)
+                    (insert " "))
+                  (cl-incf cnt))
+                (when (>= (point) end)
+                  (throw 'stop t)))))
+          (company-template-move-to-first templ)))
+
       ;; extract candidates infos
-      (defun company-ycmd--objc-param (prefix signature)
-        (when (and prefix signature)
-          (let ((match (s-match (format "%s\\(\\(?:\\^[^(]*\\)?([^)]*)\\|\\w+\\)" prefix) signature)))
-            (cadr match)
-            )))
-      (defun company-ycmd--construct-candidate-objc (candidate)
-        "function to construct completion objc string from a CANDIDATE."
-        (company-ycmd--with-destructured-candidate candidate
-          (let ((param (company-ycmd--objc-param insertion-text menu-text)))
-            (propertize insertion-text
-                        'return_type extra-menu-info
-                        'kind kind
-                        'doc detailed-info
-                        'meta detailed-info
-                        'param param))))
+      ;; (defun company-ycmd--objc-param (prefix signature)
+      ;;   (when (and prefix signature)
+      ;;     (let ((match (s-match (format "%s\\(\\(?:\\^[^(]*\\)?([^)]*)\\|\\w+\\)" prefix) signature)))
+      ;;       (cadr match)
+      ;;       )))
+      ;; (defun company-ycmd--construct-candidate-objc (candidate)
+      ;;   "function to construct completion objc string from a CANDIDATE."
+      ;;   (company-ycmd--with-destructured-candidate candidate
+      ;;     (let ((param (company-ycmd--objc-param insertion-text menu-text)))
+      ;;       (propertize insertion-text
+      ;;                   'return_type extra-menu-info
+      ;;                   'kind kind
+      ;;                   'doc detailed-info
+      ;;                   'meta detailed-info
+      ;;                   'param param))))
 
-      (advice-add 'company-ycmd--get-construct-candidate-fn :before-until
-                  (lambda () "check if objc-mode first"
-                    (when (eq major-mode 'objc-mode)
-                      #'company-ycmd--construct-candidate-objc)))
+      ;; (advice-add 'company-ycmd--get-construct-candidate-fn :before-until
+      ;;             (lambda () "check if objc-mode first"
+      ;;               (when (eq major-mode 'objc-mode)
+      ;;                 #'company-ycmd--construct-candidate-objc)))
 
-      ;; post completion, add param
-      (if (configuration-layer/package-usedp 'yasnippet)
-          (defun company-template--add-objc-param (param)
-            (let ((templ (if (string-match "([^)]+)" param)
-                             (progn (let ((mb (+ 1 (match-beginning 0)))
-                                           (me (- (match-end 0) 1))
-                                           (ct 2)
-                                           str-in-paren)
-                                      (setq str-in-paren (substring param mb me))
-                                      (setq str-in-paren (replace-regexp-in-string "[^[:blank:],][^,]*"
-                                        (lambda (str)
-                                          (prog1 (format "${%d:%s}" ct str)
-                                            (setq ct (+ ct 1)))
-                                          ) str-in-paren 't 't))
-                                      (concat "${1:" (substring param 0 mb) str-in-paren (substring param me) "}")
-                                      ))
-                           (concat "${1:" param "}"))
-                   ))
-              ;; (message "templ %s " templ)
-              (yas-expand-snippet templ)
-              (when (and (configuration-layer/package-usedp 'smartparens)
-                         (not smartparens-mode)
-                         smartparens-enabled-initially)
-                    (smartparens-mode 1))
-              ))
-        ;; when no yas, simple insert it. company-template has bugs
-        (defun company-template--add-objc-param (param)
-          (save-excursion (let* ((beg (point))
-                                 (end (progn (insert param) (point-marker)))
-                                 ;; (templ (company-template-declare-template (- beg 1) end))
-                                 )
-                            ;; (company-template-add-field templ (copy-marker beg) end)
-                            ;; (message "templated start:%d end:%d" (overlay-start templ) (overlay-end templ))
-                            ;; (company-template-move-to-first templ)
-                            ))))
-      (defun company-ycmd--objc-post-completion (candidate)
-        "Insert function arguments after completion for CANDIDATE."
-        (--when-let (and (eq major-mode 'objc-mode)
-                         company-ycmd-insert-arguments
-                         (get-text-property 0 'param candidate))
-          (company-template--add-objc-param it)
-          't
-          ))
-      (advice-add 'company-ycmd--post-completion :before-until
-                  #'company-ycmd--objc-post-completion)
+      ;; ;; post completion, add param
+      ;; (if (configuration-layer/package-usedp 'yasnippet)
+      ;;     (defun company-template--add-objc-param (param)
+      ;;       (let ((templ (if (string-match "([^)]+)" param)
+      ;;                        (progn (let ((mb (+ 1 (match-beginning 0)))
+      ;;                                      (me (- (match-end 0) 1))
+      ;;                                      (ct 2)
+      ;;                                      str-in-paren)
+      ;;                                 (setq str-in-paren (substring param mb me))
+      ;;                                 (setq str-in-paren (replace-regexp-in-string "[^[:blank:],][^,]*"
+      ;;                                   (lambda (str)
+      ;;                                     (prog1 (format "${%d:%s}" ct str)
+      ;;                                       (setq ct (+ ct 1)))
+      ;;                                     ) str-in-paren 't 't))
+      ;;                                 (concat "${1:" (substring param 0 mb) str-in-paren (substring param me) "}")
+      ;;                                 ))
+      ;;                      (concat "${1:" param "}"))
+      ;;              ))
+      ;;         ;; (message "templ %s " templ)
+      ;;         (yas-expand-snippet templ)
+      ;;         (when (and (configuration-layer/package-usedp 'smartparens)
+      ;;                    (not smartparens-mode)
+      ;;                    smartparens-enabled-initially)
+      ;;               (smartparens-mode 1))
+      ;;         ))
+      ;;   ;; when no yas, simple insert it. company-template has bugs
+      ;;   (defun company-template--add-objc-param (param)
+      ;;     (save-excursion (let* ((beg (point))
+      ;;                            (end (progn (insert param) (point-marker)))
+      ;;                            ;; (templ (company-template-declare-template (- beg 1) end))
+      ;;                            )
+      ;;                       ;; (company-template-add-field templ (copy-marker beg) end)
+      ;;                       ;; (message "templated start:%d end:%d" (overlay-start templ) (overlay-end templ))
+      ;;                       ;; (company-template-move-to-first templ)
+      ;;                       ))))
+      ;; (defun company-ycmd--objc-post-completion (candidate)
+      ;;   "Insert function arguments after completion for CANDIDATE."
+      ;;   (--when-let (and (eq major-mode 'objc-mode)
+      ;;                    company-ycmd-insert-arguments
+      ;;                    (get-text-property 0 'param candidate))
+      ;;     (company-template--add-objc-param it)
+      ;;     't
+      ;;     ))
+      ;; (advice-add 'company-ycmd--post-completion :before-until
+      ;;             #'company-ycmd--objc-post-completion)
   )))
 
 
