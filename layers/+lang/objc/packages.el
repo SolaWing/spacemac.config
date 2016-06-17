@@ -68,6 +68,7 @@
             (goto-char beg)
             (catch 'stop
               (while (search-forward ":" end t)
+                ;; Fix block param detect
                 (if (looking-at "\\(\\(?:\\^[^(]*\\)?([^)]*)\\(\\w*\\)\\|\\w+\\)")
                     (company-template-add-field templ (point) (match-end 1))
                   ;; Not sure which conditions this case manifests under, but

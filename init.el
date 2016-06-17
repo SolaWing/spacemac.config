@@ -32,12 +32,14 @@ values."
      ycmd
      syntax-checking
      c-c++
+     rust
      python
      emacs-lisp
      osx
      git
      markdown
      org
+     latex
      unimpaired
      eyebrowse
      ;; (shell :variables
@@ -257,6 +259,7 @@ in `dotspacemacs/user-config'."
    custom-file "~/.spacemacs.d/custom.el"
    ;; TODO now mainly use objc project, write common judge function later
    c-c++-default-mode-for-headers 'objc-mode
+   rust-enable-racer t
    ;; mirror of package
    ;; add popkit for china connection
    configuration-layer--elpa-archives
@@ -288,6 +291,8 @@ layers configuration. You are free to put any user code."
   (if window-system (menu-bar-mode 1))
   (unless (getenv "LANG")
     (setenv "LANG" "zh_CN.UTF-8") (set-locale-environment "zh_CN.UTF-8"))
+  (unless (getenv "RUST_SRC_PATH")
+    (setenv "RUST_SRC_PATH" (expand-file-name "~/Documents/github/rust/src")))
 
   (electric-indent-mode -1)             ; not use auto indent when RET
   ;; (global-set-key (kbd "s-m") 'suspend-frame)
@@ -376,10 +381,10 @@ layers configuration. You are free to put any user code."
   (interactive)
 
   (if (use-region-p) (yas/visual-insert)
-    ;; (let ((yas-fallback-behavior 'return-nil))
-    ;;   (unless (yas-expand-from-trigger-key)
+    (let ((yas-fallback-behavior 'return-nil))
+      (unless (yas-expand-from-trigger-key)
         (helm-yas-complete))
-      ;; ))
+      ))
   )
 
 (defun yas/visual-insert ()

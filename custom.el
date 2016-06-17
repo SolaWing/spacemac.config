@@ -8,6 +8,11 @@
  '(mouse-wheel-scroll-amount (quote (1 ((meta) . 5) ((control)))))
  '(org-agenda-files (quote ("~/Desktop/GTD/dairy/" "~/Desktop/GTD/")))
  '(org-babel-load-languages (quote ((emacs-lisp . t) (dot . t))))
+ '(org-format-latex-options
+   (quote
+    (:foreground default :background default :scale 1.2 :html-foreground "Black" :html-background "Transparent" :html-scale 1.2 :matchers
+                 ("begin" "$1" "$" "$$" "\\(" "\\["))))
+ '(org-latex-preview-ltxpng-directory "/tmp/ltxpng/")
  '(org-src-lang-modes
    (quote
     (("ocaml" . tuareg)
@@ -23,7 +28,8 @@
      ("screen" . shell-script)
      ("shell" . sh)
      ("bash" . sh))))
- '(paradox-github-token t))
+ '(paradox-github-token t)
+ '(tex-directory "/tmp/tex"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
