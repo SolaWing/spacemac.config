@@ -263,10 +263,15 @@ in `dotspacemacs/user-config'."
    ;; mirror of package
    ;; add popkit for china connection
    configuration-layer--elpa-archives
-   '(("popkit". "http://elpa.popkit.org/packages/")
-     ("melpa" . "melpa.org/packages/") 
-     ("org"   . "orgmode.org/elpa/")
-     ("gnu"   . "elpa.gnu.org/packages/"))
+   '(("melpa-cn" . "http://elpa.zilongshanren.com/melpa/")
+     ("org-cn"   . "http://elpa.zilongshanren.com/org/")
+     ("gnu-cn"   . "http://elpa.zilongshanren.com/gnu/"))
+
+   ;; '(("popkit". "http://elpa.popkit.org/packages/")
+   ;;   ("melpa" . "melpa.org/packages/")
+   ;;   ;;("org"   . "orgmode.org/elpa/")
+   ;;   ;;("gnu"   . "elpa.gnu.org/packages/")
+   ;;   )
    ;; ycmd
    ycmd-server-command (list "python" (expand-file-name "~/.vim/bundle/YouCompleteMe/third_party/ycmd/ycmd/"))
    ycmd-global-config (expand-file-name "~/.vim/bundle/YouCompleteMe/.ycm_extra_conf.py")
