@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+#name : example
+#key : example_
+#contributor : SolaWing
+# --
+#+BEGIN_EXAMPLE
+    $0
+#+END_EXAMPLE

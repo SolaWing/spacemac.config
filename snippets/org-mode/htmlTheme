@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: htmlTheme
+# key: htmlTheme
+# --
+#+SETUPFILE: ${1:/Users/wang/.spacemacs.d/org-html-themes/setup/theme-readtheorg.setup}

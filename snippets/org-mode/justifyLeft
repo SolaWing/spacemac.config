@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: justifyLeft
+# key: justifyLeft_
+# --
+#+BEGIN_JUSTIFYLEFT
+    $0
+#+END_JUSTIFYLEFT
