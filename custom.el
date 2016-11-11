@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(company-ycmd-request-sync-timeout 0.2)
  '(create-lockfiles nil)
+ '(dired-use-ls-dired nil)
  '(mouse-wheel-scroll-amount (quote (1 ((meta) . 5) ((control)))))
  '(org-agenda-files (quote ("~/Desktop/GTD/dairy/" "~/Desktop/GTD/")))
  '(org-babel-load-languages (quote ((emacs-lisp . t) (dot . t))))
