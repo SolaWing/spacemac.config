@@ -360,10 +360,10 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; 中国文字等宽确定
   ;; Chinese Font 配制中文字体
   (dolist (charset '(kana han symbol cjk-misc bopomofo))
-    (set-fontset-font 'nil charset (font-spec :family "Kaiti SC")))
+    (set-fontset-font 'nil charset "Kaiti SC"))
   (add-to-list 'face-font-rescale-alist '("Kaiti SC" . 1.2))
 
- (if window-system (menu-bar-mode 1))
+  (if window-system (menu-bar-mode 1))
   (unless (getenv "LANG")
     (setenv "LANG" "zh_CN.UTF-8") (set-locale-environment "zh_CN.UTF-8"))
   (unless (getenv "RUST_SRC_PATH")
