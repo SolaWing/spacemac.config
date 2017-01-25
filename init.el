@@ -31,6 +31,7 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     html
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -52,7 +53,7 @@ values."
      emacs-lisp
      osx
      git
-     markdown
+     (markdown :variables markdown-live-preview-engine 'vmd)
      org
      latex
      ;; (shell :variables
@@ -354,7 +355,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   explicitly specified that a variable should be set before a package is loaded,
   you should place your code here."
 
-  ;; Setting English Font 
+  ;; Setting English Font
   ;; (set-face-attribute
   ;;  'default nil :font "PingFang SC 14")
   ;; 中国文字等宽确定
@@ -365,13 +366,14 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   (if window-system (menu-bar-mode 1))
   (unless (getenv "LANG")
-    (setenv "LANG" "zh_CN.UTF-8") (set-locale-environment "zh_CN.UTF-8"))
+    (setenv "LANG" "zh_CN.UTF-8"))
+  (set-locale-environment (getenv "LANG"))
+
   (unless (getenv "RUST_SRC_PATH")
     (setenv "RUST_SRC_PATH" (expand-file-name "~/Documents/github/rust/src")))
 
   (electric-indent-mode -1)             ; not use auto indent when RET
   ;; (global-set-key (kbd "s-m") 'suspend-frame)
-  (define-key spacemacs-default-map (kbd "SPC") 'evil-avy-goto-char)
   (global-set-key (kbd "<s-backspace>") 'kill-whole-line)
 
   (use-package evil :defer t
