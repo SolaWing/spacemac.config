@@ -325,6 +325,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
   (setq-default
    custom-file "~/.spacemacs.d/custom.el"
    ;; TODO now mainly use objc project, write common judge function later
@@ -333,10 +334,9 @@ before packages are loaded. If you are unsure, you should try in setting them in
    ;; mirror of package
    ;; add popkit for china connection
    configuration-layer--elpa-archives
-   '(("melpa-cn" . "http://elpa.zilongshanren.com/melpa/")
-     ("org-cn"   . "http://elpa.zilongshanren.com/org/")
-     ("gnu-cn"   . "http://elpa.zilongshanren.com/gnu/"))
-
+      '(("melpa-cn" . "https://elpa.emacs-china.org/melpa/")
+        ("org-cn"   . "https://elpa.emacs-china.org/org/")
+        ("gnu-cn"   . "https://elpa.emacs-china.org/gnu/"))
    ;; '(("popkit". "http://elpa.popkit.org/packages/")
    ;;   ("melpa" . "melpa.org/packages/")
    ;;   ;;("org"   . "orgmode.org/elpa/")
